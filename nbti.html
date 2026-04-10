@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NBTI 人格测试 — 你到底是哪种牛马？</title>
+<style>
+  :root {
+    --bg: #fff0f5;
+    --bg2: #fdf5f8;
+    --card: #ffffff;
+    --accent: #ff4d8d;
+    --accent-light: #ffe0ec;
+    --accent-hover: #e6006e;
+    --text: #1a1a1a;
+    --sub: #aaa;
+    --border: #ffd6e7;
+    --border2: #ffe8f2;
+    --tag-green: #00c98d;
+    --tag-yellow: #ff9f1c;
+    --tag-blue: #7b8cde;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: linear-gradient(160deg, #fff0f8 0%, #fff8fb 40%, #f0f4ff 100%);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .container { max-width: 720px; width: 100%; }
+
+  /* ===== 封面 ===== */
+  #cover {
+    text-align: center;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .logo-tag {
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--sub);
+    text-transform: uppercase;
+  }
+
+  .main-title {
+    font-size: clamp(56px, 14vw, 108px);
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -2px;
+    line-height: 1;
+    text-shadow: 0 4px 24px rgba(255, 77, 141, 0.25);
+  }
+
+  .sub-title {
+    font-size: clamp(16px, 4vw, 22px);
+    color: #cc6b8e;
+    letter-spacing: 2px;
+  }
+
+  .cover-desc {
+    font-size: 14px;
+    color: #c08098;
+    max-width: 400px;
+    line-height: 1.9;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 28px;
+  }
+
+  .cover-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .badge {
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 1px;
+    border: 1px solid var(--border);
+  }
+
+  .start-btn {
+    margin-top: 10px;
+    padding: 18px 64px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 50px;
+    letter-spacing: 2px;
+    transition: all 0.2s;
+    box-shadow: 0 6px 24px rgba(255, 77, 141, 0.35);
+  }
+
+  .start-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(255, 77, 141, 0.4);
+  }
+
+  .disclaimer {
+    font-size: 12px;
+    color: #daa8ba;
+    margin-top: -8px;
+  }
+
+  /* ===== 测试区 ===== */
+  #quiz { display: none; }
+
+  .progress-wrap {
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #cc8aaa;
+    font-weight: 600;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--border2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff9ec8, var(--accent));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 24px rgba(255, 100, 160, 0.08);
+  }
+
+  .q-number {
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+
+  .q-text {
+    font-size: clamp(15px, 3vw, 18px);
+    line-height: 1.85;
+    color: var(--text);
+    margin-bottom: 28px;
+    font-weight: 600;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    background: var(--bg2);
+    border: 1.5px solid var(--border2);
+    color: #555;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    /* ✅ 关键修复：去掉 transition，防止重绘闪烁 */
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    /* 只对 border 和 background 做过渡 */
+    transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
+    will-change: transform;
+    /* 关闭不必要的合成层 */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .option-btn:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+    transform: translateX(5px);
+  }
+
+  /* ✅ selected 只改颜色，不触发布局重排 */
+  .option-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+    transform: translateX(5px);
+    box-shadow: 0 2px 12px rgba(255, 77, 141, 0.15);
+  }
+
+  .opt-label {
+    font-weight: 800;
+    color: var(--accent);
+    min-width: 20px;
+    font-size: 12px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  /* 非selected 时 label 颜色 */
+  .option-btn:not(.selected):not(:hover) .opt-label {
+    color: #dda0bb;
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .nav-btn {
+    flex: 1;
+    padding: 14px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: #cc8aaa;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 14px;
+    transition: all 0.15s;
+    font-weight: 600;
+  }
+
+  .nav-btn:hover { border-color: #ffaacc; color: var(--accent); background: var(--accent-light); }
+
+  .nav-btn.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px rgba(255, 77, 141, 0.3);
+  }
+
+  .nav-btn.primary:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 6px 20px rgba(255, 77, 141, 0.4);
+  }
+
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ===== 结果区 ===== */
+  #result { display: none; padding: 20px 0; }
+
+  .result-header {
+    text-align: center;
+    padding: 48px 24px;
+    background: linear-gradient(135deg, #fff0f7 0%, #fff 50%, #f5f0ff 100%);
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(255, 100, 160, 0.1);
+  }
+
+  .result-header::before {
+    content: '✦';
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 20px;
+    color: var(--border);
+  }
+
+  .result-header::after {
+    content: '✦';
+    position: absolute;
+    bottom: 16px;
+    left: 20px;
+    font-size: 14px;
+    color: var(--border);
+  }
+
+  .result-label {
+    font-size: 13px;
+    color: var(--sub);
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  .result-code {
+    font-size: clamp(64px, 16vw, 112px);
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -2px;
+    line-height: 1;
+    text-shadow: 0 4px 32px rgba(255, 77, 141, 0.3);
+  }
+
+  .result-name {
+    font-size: clamp(20px, 5vw, 30px);
+    font-weight: 700;
+    margin: 16px 0 8px;
+    color: #333;
+  }
+
+  .result-tagline {
+    font-size: 14px;
+    color: #cc8aaa;
+    font-style: italic;
+    padding: 0 20px;
+    line-height: 1.7;
+  }
+
+  .result-block {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(255, 100, 160, 0.06);
+  }
+
+  .block-title {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  #r-desc {
+    font-size: 15px;
+    line-height: 2;
+    color: #555;
+  }
+
+  /* ===== 维度 ===== */
+  .dim-item {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .dim-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .dim-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dim-name { font-size: 14px; font-weight: 700; color: #333; }
+
+  .dim-level {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+
+  .level-H { background: var(--accent-light); color: var(--accent); }
+  .level-M { background: #fff3e0; color: var(--tag-yellow); }
+  .level-L { background: #eef0ff; color: var(--tag-blue); }
+
+  .dim-bar-wrap {
+    height: 5px;
+    background: var(--border2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .dim-bar { height: 100%; border-radius: 3px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .bar-H { background: linear-gradient(90deg, #ffb3d1, var(--accent)); }
+  .bar-M { background: linear-gradient(90deg, #ffe0a0, var(--tag-yellow)); }
+  .bar-L { background: linear-gradient(90deg, #c5caf5, var(--tag-blue)); }
+
+  .dim-desc { font-size: 12px; color: #bbb; line-height: 1.7; }
+
+  /* ===== 分享 ===== */
+  .share-card {
+    background: var(--bg2);
+    border: 1.5px dashed var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #aaa;
+    line-height: 2;
+    text-align: center;
+  }
+
+  .share-code-big { color: var(--accent); font-size: 22px; font-weight: 900; }
+
+  .copy-btn {
+    padding: 12px 32px;
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover {
+    background: var(--accent-light);
+    transform: translateY(-1px);
+  }
+
+  .restart-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    transition: all 0.2s;
+    box-shadow: 0 6px 24px rgba(255, 77, 141, 0.3);
+  }
+
+  .restart-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(255, 77, 141, 0.4);
+  }
+
+  .footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: #ddb8ca;
+    padding: 20px;
+    line-height: 2;
+  }
+
+  /* ===== 特殊题 ===== */
+  .special-q { border-color: rgba(255, 77, 141, 0.4) !important; }
+
+  .special-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 3px 10px;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 20px;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+  }
+
+  /* ===== 动画 ===== */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeIn 0.45s ease forwards; }
+
+  /* 花瓣装饰 */
+  .deco {
+    position: fixed;
+    pointer-events: none;
+    font-size: 20px;
+    opacity: 0.12;
+    z-index: 0;
+    user-select: none;
+  }
+  .deco-1 { top: 8%; left: 3%; font-size: 32px; }
+  .deco-2 { top: 20%; right: 4%; font-size: 24px; }
+  .deco-3 { bottom: 15%; left: 6%; font-size: 18px; }
+  .deco-4 { bottom: 30%; right: 5%; font-size: 28px; }
+</style>
+</head>
+<body>
+
+<!-- 装饰 -->
+<div class="deco deco-1">🌸</div>
+<div class="deco deco-2">✦</div>
+<div class="deco deco-3">✦</div>
+<div class="deco deco-4">🌸</div>
+
+<div class="container">
+
+<!-- ===== 封面 ===== -->
+<div id="cover" class="fade-in">
+  <div class="logo-tag">Personality Test 2025</div>
+  <div class="main-title">NBTI</div>
+  <div class="sub-title">你到底是哪种牛马？</div>
+  <div class="cover-desc">
+    MBTI已经过时了，SBTI也不够用了。<br>
+    现在，是时候直面最抽象的自己了。<br>
+    25题 · 15维度 · 1个让你哭笑不得的结果
+  </div>
+  <div class="cover-badges">
+    <span class="badge">🎭 25题</span>
+    <span class="badge">📐 15维度</span>
+    <span class="badge">💀 15种人格</span>
+    <span class="badge">⏱ 约3分钟</span>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">✦ 开始测试 ✦</button>
+  <div class="disclaimer">本测试纯属娱乐，如有雷同纯属活该。请勿用于求职、相亲、招魂或法庭证词。</div>
+</div>
+
+<!-- ===== 测试区 ===== -->
+<div id="quiz">
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="q-count">第 1 题</span>
+      <span id="q-pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+  <div id="question-area"></div>
+  <div class="nav-row">
+    <button class="nav-btn" id="prev-btn" onclick="prevQ()" disabled>← 上一题</button>
+    <button class="nav-btn primary" id="next-btn" onclick="nextQ()">下一题 →</button>
+  </div>
+</div>
+
+<!-- ===== 结果区 ===== -->
+<div id="result">
+  <div class="result-header fade-in">
+    <div class="result-label">✦ 你的 NBTI 人格是 ✦</div>
+    <div class="result-code" id="r-code">CLWN</div>
+    <div class="result-name" id="r-name">宇宙小丑</div>
+    <div class="result-tagline" id="r-tagline">"我的人生是一部喜剧，我自己也笑了。"</div>
+  </div>
+
+  <div class="result-block fade-in">
+    <div class="block-title">人格解析 · Personality Profile</div>
+    <div id="r-desc"></div>
+  </div>
+
+  <div class="result-block fade-in">
+    <div class="block-title">15维度分析 · 15 Dimensions</div>
+    <div id="r-dims"></div>
+  </div>
+
+  <div class="result-block fade-in">
+    <div class="block-title">分享结果 · Share</div>
+    <div class="share-card">
+      我做了 NBTI 人格测试<br>
+      我的结果是 <span class="share-code-big" id="share-code-display">CLWN</span><br>
+      <span id="share-name-display">宇宙小丑</span><br>
+      —— 你到底是哪种牛马？
+    </div>
+    <div style="text-align:center">
+      <button class="copy-btn" onclick="copyResult()">📋 复制结果文案</button>
+    </div>
+  </div>
+
+  <button class="restart-btn" onclick="restart()">🔁 再测一次 / 换个结果</button>
+
+  <div class="footer-note">
+    NBTI · 本测试仅供娱乐，别拿它当诊断、面试或算命依据。<br>
+    灵感来源：Bilibili 爆火 SBTI 人格测试 🌸
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ===================================================
+// 数据定义
+// ===================================================
+const DIMS = [
+  { id:'D1',  name:'宇宙感知力',   desc:'对"我是谁、我在哪、我在干嘛"这类问题的敏感程度与思考深度' },
+  { id:'D2',  name:'混乱适应度',   desc:'面对失控局面时保持运转的能力，低则崩溃，高则越乱越稳' },
+  { id:'D3',  name:'存在意义感',   desc:'是否觉得自己的存在有某种使命感，低者随遇而安，高者使命必达' },
+  { id:'D4',  name:'情感投放量',   desc:'主动在关系中投入情感的多少，低者佛系旁观，高者全情燃烧' },
+  { id:'D5',  name:'心理边界感',   desc:'对自我与他人边界的敏感度，低者易被入侵，高者城墙厚实' },
+  { id:'D6',  name:'情绪处理速',   desc:'消化负面情绪的速度，低者余震持久，高者风过无痕' },
+  { id:'D7',  name:'社交能量值',   desc:'社交行为消耗还是补充能量，低者社交后需充电，高者越聊越亢奋' },
+  { id:'D8',  name:'规则服从性',   desc:'对规则和系统的态度，低者天然叛逆，高者视规则为安全感' },
+  { id:'D9',  name:'决策果断度',   desc:'做选择时的速度和确定感，低者反复横跳，高者一锤定音' },
+  { id:'D10', name:'执行持续力',   desc:'把事情做完的能力，低者万事开头，高者善始善终' },
+  { id:'D11', name:'自我清晰度',   desc:'对自己是谁、要什么的认知程度，低者模糊随波，高者认知精准' },
+  { id:'D12', name:'外部期待抗压', desc:'抵抗他人期待和社会压力的能力，低者容易迷失，高者岿然不动' },
+  { id:'D13', name:'创意爆发力',   desc:'产生非常规想法的频率，低者稳扎稳打，高者脑洞令人窒息' },
+  { id:'D14', name:'现实落地性',   desc:'将想法转化为实际行动的能力，低者停于幻想，高者说到做到' },
+  { id:'D15', name:'牛马自觉度',   desc:'对自己"社畜身份"的认知与接受程度，低者仍有幻想，高者已然顿悟' },
+];
+
+const QUESTIONS = [
+  { dim:0,  special:false, q:'某天你发现自己变成了一只蟑螂，你的第一反应是？',
+    opts:['淡定爬上墙，开始侦察周围环境，顺便规划逃跑路线','立刻躺平，反正人生也差不多','疯狂在地板上打转，大声嘶吼："为什么！！！"','想着这下再也不用上班了，感到一丝欣慰'],
+    scores:[3,1,2,1] },
+  { dim:0,  special:false, q:'外星人入侵地球，你被选中代表人类谈判，你会说？',
+    opts:['"你们有WiFi吗？"','"我能加入你们吗，这边已经没什么值得留恋的了"','镇定地用PPT汇报地球的优缺点，附带数据分析','"你们的领导怎么联系，我要投诉你们入侵流程不规范"'],
+    scores:[1,1,3,2] },
+  { dim:1,  special:false, q:'你突然获得了预知未来的能力，你用它来干什么？',
+    opts:['预测明天的外卖会不会准时，这是最重要的事','认真研究股票，为自己的财富自由做规划','预测哪天心情好，提前把那天排满约会','直接看自己的死亡日期，然后按期摆烂到底'],
+    scores:[1,3,2,1] },
+  { dim:1,  special:false, q:'有人告诉你，你其实只是宇宙模拟程序里的一个NPC，你的反应是？',
+    opts:['"那我要找GM   请开挂"','"终于有了合理解释，怪不得我的人生剧情这么烂"','开始认真研究怎么跳出模拟，找到底层代码','继续吃泡面，这个消息对我的生活没有任何改变'],
+    scores:[2,1,3,1] },
+  { dim:2,  special:false, q:'你被困在一个无限循环的星期一里，你怎么破局？',
+    opts:['把每次循环当做不同存档，尝试各种人生选择','第3次循环后彻底接受命运，开始享受无限星期一','疯狂记录每次循环的细节，试图找到规律','第一次循环结束时就已经睡着了，根本没注意到在循环'],
+    scores:[3,1,2,1] },
+  { dim:3,  special:false, q:'朋友突然向你表白，你喜欢他/她，但你的第一反应是？',
+    opts:['直接答应，冲就完了','感动到哭，然后说"我要回去想想"，回去睡了三天','开始分析这段关系的可行性，用Excel列了个表','"你确定你不是在跟我说玩笑？你确定？你再确定一次？"'],
+    scores:[3,1,2,1] },
+  { dim:3,  special:false, q:'你正在被分手，对方给出的理由是"我们不合适"，你怎么说？',
+    opts:['"能具体解释一下哪里不合适吗？我做个改进计划"','"好的，祝你幸福。"然后回家吃了一顿大餐','当场石化，三分钟后才反应过来说了句"哦"','"合适不合适我来判断，你先别急着走"'],
+    scores:[2,3,1,2] },
+  { dim:4,  special:false, q:'你最好的朋友突然消失了，三天不回消息，你会？',
+    opts:['派出侦探级排查，从最后一条朋友圈开始溯源','理解他/她需要空间，静静等待','默默在心里把对方的好友等级降了一级','发了99条消息，每条都是不同emoji，看对方什么时候出现'],
+    scores:[2,3,1,1] },
+  { dim:4,  special:false, q:'你发现自己莫名其妙喜欢上一个哲学系学生，对方整天说些听不懂的话，你会？',
+    opts:['疯狂补课哲学，争取听懂对方在说什么','微笑点头，内心OS："完全不懂，但你说得对"','让对方用人话重说一遍','默默放弃，回去找个聊泡面的人'],
+    scores:[3,2,2,1] },
+  { dim:5,  special:false, q:'你在朋友圈看到前任晒出了新欢，你的内心活动是？',
+    opts:['麻木，点了个赞，自己都不知道为什么','认真审视对方的新欢，进行客观比较分析','当场立志，开始了三天的自我提升计划（第四天放弃）','祝福对方，然后把手机放下，去做自己的事'],
+    scores:[1,2,1,3] },
+  { dim:5,  special:false, q:'你在地铁上不小心踩了别人的脚，对方瞪了你一眼，你会？',
+    opts:['真诚道歉，内心愧疚一整天','连忙道歉，然后换个车厢躲避尴尬','眼神对视三秒，精神力比拼，绝不先移开','还没反应过来已经到站了，下车时对方还在等你道歉'],
+    scores:[2,2,2,1] },
+  { dim:6,  special:false, q:'公司要求你做年终总结PPT，你的做法是？',
+    opts:['认认真真做，字体统一，配色和谐，逻辑严密','找了个模板，改了个名字，发过去了','让ChatGPT写完，自己润色了三个字','以为自己在认真做，打开软件后发了两小时呆'],
+    scores:[3,1,2,1] },
+  { dim:6,  special:false, q:'你在网上发了一条动态，结果被陌生人骂了，你怎么处理？',
+    opts:['礼貌回复，摆事实讲道理，等待对方认错','直接拉黑，眼不见心不烦','截图发给朋友，一起骂回去','反复看那条评论，睡前还在想，第二天情绪低落'],
+    scores:[2,3,1,1] },
+  { dim:7,  special:false, q:'你参加了一个你一个人都不认识的聚会，你怎么度过？',
+    opts:['主动出击，两小时内认识全场所有人','找个角落吃东西，偶尔礼貌性微笑','和组织者待在一起，假装自己很重要','中途假装接到电话，溜了'],
+    scores:[3,1,2,1] },
+  { dim:7,  special:false, q:'你的老板突然当众表扬了你，全场都在看你，你会？',
+    opts:['淡定致谢，顺带提了一下团队贡献','脸红到想钻地缝，说话语无伦次','心里很开心但表情管理到位，面不改色','完全没想到，以为老板在说别人，回头找了半天'],
+    scores:[3,1,2,1] },
+  { dim:8,  special:false, q:'你半夜3点睡不着，你在干什么？',
+    opts:['刷手机，内容从猫咪视频变成了量子力学科普','开始认真思考自己的人生规划，越想越睡不着','翻来覆去盯着天花板，和自己进行一场漫长的辩论','已经睡着了，半夜3点对我来说是深度睡眠阶段'],
+    scores:[2,2,1,3] },
+  { dim:8,  special:false, q:'如果你可以拥有一个超能力，你会选择？',
+    opts:['随时随地睡着的能力（无论在哪，立刻入睡）','瞬间理解任何语言包括代码和猫叫','让任何食物热量变成零','让时间暂停，用来补觉和拖延deadline'],
+    scores:[1,3,2,1] },
+  { dim:9,  special:false, q:'你发现家里的猫/狗/植物其实都能听懂你说话，它们只是选择不回应，你会？',
+    opts:['开始和它们进行严肃认真的深度对话','继续假装不知道，维持现有的平衡关系','立刻质问："我这些年说的话你都听到了？！"','表示理解，你有时候也选择不回应别人'],
+    scores:[2,2,2,1] },
+  { dim:9,  special:false, q:'你被迫参加一个荒岛求生节目，你最先做的事是？',
+    opts:['评估资源，建立生存优先级清单','找一个高地，拍了几张风景照','尝试和其他参与者组建联盟，提前布局','问导演组什么时候有外卖'],
+    scores:[3,1,2,1] },
+  { dim:10, special:false, q:'你穿越回了古代，你会选择哪条出路？',
+    opts:['认真备考科举，改变命运','开始写超越时代的小说，先富脑袋再富口袋','找个山清水秀的地方种地，过佛系生活','还没想好，已经因为水土不服病倒了'],
+    scores:[3,2,1,1] },
+  { dim:10, special:false, q:'如果人生是一款游戏，你觉得自己现在处于哪个阶段？',
+    opts:['新手引导期，还没搞清楚规则','卡关了，在同一个boss前反复死亡','在开放世界里漫无目的地转悠，顺便捡垃圾','已经通关一次了，在打二周目，这次想换个路线'],
+    scores:[1,1,2,3] },
+  { dim:11, special:false, q:'你的人生字幕如果只能有一句话，你希望是什么？',
+    opts:['"他来过，他努力过，他睡够了"','"此人逻辑清晰，情绪稳定，午饭从不拖延"','"虽然迷路了，但风景不错"','"等一下，我再想想"'],
+    scores:[1,3,2,1] },
+  { dim:12, special:true, special_badge:'深度灵魂拷问',
+    q:'你死后如果可以变成一样东西，你选择？',
+    opts:['WiFi路由器，永远被人需要','一棵树，安静地活着，没有KPI','一本书，被人翻阅，偶尔影响他人','一个bug，让世界的运行偶尔出现混乱，以证明自己来过'],
+    scores:[2,1,3,2] },
+  { dim:13, special:false, q:'你正在认真做一件事，突然有人问你"你这样做有什么意义"，你会？',
+    opts:['停下来，认真思考三分钟，然后继续','被这个问题困扰了整整一周，最终没有继续','直接回答："没意义，但我开心"','反问对方："你说话有什么意义？"'],
+    scores:[2,1,3,2] },
+  { dim:14, special:false, q:'看到这道题（最后一题），你的感受是？',
+    opts:['终于结束了，我要去睡觉了','有点意犹未尽，感觉没测出真实的我','开始分析这25道题背后的设计逻辑','这道题本身就是一个陷阱，我看穿了'],
+    scores:[1,2,3,2] },
+];
+
+const TYPES = [
+  { code:'CEOS',  name:'宇宙CEO',      tagline:'"我不是傲慢，我只是效率太高让别人产生了错觉。"',          pattern:'HHMHHHMHHHHHMHH', desc:'你生来就相信自己是某种意义上的领袖。不是那种靠喊口号的领袖，而是那种走进房间空气都会自动让道的领袖。你的日程表永远满满当当，但你永远知道哪件事最重要。你分析问题的速度快到让旁边的人以为你在敷衍，但事实上你已经想了十七层。你偶尔让人觉得冷漠，但你只是不愿意把时间花在无效社交上。感情上你不轻易动心，但一旦认定就会全力投入，只是你的"全力投入"可能还是带着一份项目管理的气质。你的人生字幕大概是：此次会议已超时，请各位牛马加快进度。' },
+  { code:'FLOTR', name:'随波逐流者',   tagline:'"顺其自然是我的人生哲学，懒得抵抗是真相。"',             pattern:'LLMLLMLLLLMLLLL', desc:'你不是没有想法，你只是不觉得自己的想法值得为之折腾。你是朋友圈里永远在说"都行""随便""你决定"的那个人。有人说你佛系，你表示连"佛系"这个标签都懒得贴。你有惊人的适应能力，无论是新工作还是新城市，你都能在三天内活得如鱼得水，但代价是你也不知道自己到底想要什么。你的情感世界里有一片海，深不见底，但通常风平浪静。你的人生信条是：既来之则安之，若不安则睡之。' },
+  { code:'GLCH',  name:'系统故障者',   tagline:'"我不是有问题，我是有特色。"',                           pattern:'HHLHHLMLLHHLHHM', desc:'你是那种让程序员头疼、让占星师困惑、让心理医生写论文的存在。你的思维跳跃到别人根本跟不上，前一秒在聊量子纠缠，后一秒已经开始担心明天的午饭。你天生对规则有一种本能的抵触，不是叛逆，只是你觉得大多数规则都没想清楚。你的朋友圈里你是那个"突然消失三个月，再出现时带着全新想法"的人。感情上你热情如火，但让对方看懂你大概需要一年时间。你的人生信条：正常是一种浪费，故障才是特效。' },
+  { code:'DRKM',  name:'暗夜沉思者',   tagline:'"我没有失眠，我只是在夜间运行高优先级任务。"',           pattern:'HHMHLMLLHMLHMLL', desc:'你的最佳状态永远在深夜。白天你像个普通人，夜里你才启动真正的自己。你的脑子里有一座24小时运转的工厂，专门生产"如果当时我那样说了会怎样"和"人类为什么要存在"这类产品。你敏感、细腻，能感知到别人表情里0.3秒的变化，但你通常不说出来。你不是不快乐，只是快乐对你来说是一种复杂的多维体验，不是简单的哈哈哈就能概括的。你的人生字幕：我只是在想，要一直想到想通为止。' },
+  { code:'CLWN',  name:'宇宙小丑',     tagline:'"我的人生是一部喜剧，我自己也笑了。"',                   pattern:'MLMHMLHLLMLMHML', desc:'你是派对的灵魂，也是散场后最先感到空洞的那个人。你用幽默武装自己，但熟悉你的人知道那些笑话里藏着一半是真话。你不怕被嘲笑，因为你已经把自己嘲笑得很彻底了。你的朋友觉得你永远没心没肺，但其实你感受到的比任何人都多，只是你选择把它们变成段子。你喜欢让别人快乐，但有时候会忘记问自己是否快乐。你的超能力：在所有人都沉默的时候，说出那句打破尴尬的话。' },
+  { code:'ANLY',  name:'永动分析机',   tagline:'"我不是钻   角尖，我是在对齐认知框架。"',                 pattern:'HHHMMHHHHHHHHLL', desc:'你的大脑是一台永不关机的分析仪。买个外卖你要比较五家店的评分趋势；谈个恋爱你要建立对方的性格模型；你的手机备忘录里有各种分类清单。你不是不感性，你只是习惯先理解再感受。你是朋友里最能提供建议的那个，但别人很少回来跟你说"你说得对"，因为你太对了，对到让人有点沮丧。你的人生信条：没有数据支撑的感受，都是玄学。' },
+  { code:'MOSSR', name:'不动如山苔藓', tagline:'"我不是没有进步，我是生长得很慢但很稳。"',               pattern:'LLMLLMLLMLLHLLM', desc:'你是人群里最安静的那块石头上长得最茂盛的苔藓。不显眼，但在。你不追热点，不焦虑，不在意别人用什么手机或者住哪个小区。你有自己缓慢但确定的节奏，别人一年换三份工作，你在同一个地方静静打磨了三年，然后你比他们都厉害。你的感情观是：细水长流，不期而至。你最大的敌人是外部催促，但你有一种神奇的能力——把催促过滤掉，继续按照自己的节奏生长。' },
+  { code:'CHAO',  name:'混沌爆发体',   tagline:'"我不是乱，我只是多线程运行，CPU占用100%。"',           pattern:'HHLHHMHLMHHLHLL', desc:'你同时在做七件事，完成其中两件，另外五件成为永久的"待办"。你的能量爆发时能感染整个房间，但这种爆发是间歇性的，中间夹着漫长的低电量模式。你的朋友圈里你是那个"三天热度先生/女士"，但你自己知道，你不是没热情，只是热情来得太密集，系统经常过载。你最大的魅力是创意和活力，最大的挑战是收尾。你需要一个能帮你"保存进度"的人。' },
+  { code:'ICBR',  name:'冰川破壁人',   tagline:'"我看起来很冷，是因为大部分人还没到达融化层。"',         pattern:'MMMLLHLLHMHHLML', desc:'表面上你是人群里最难接近的那一个。少言寡语，表情管理到位，让人搞不清楚你到底有没有认真参与这段对话。但是——只要有人真正进入你的世界，会发现里面是一整个温泉疗养胜地。你对亲近的人极其细心，记得住每一个重要的日子。你的问题只有一个：进入你世界的门槛太高，很多好人已经在门口等不下去了。' },
+  { code:'NOOD',  name:'精神泡面族',   tagline:'"人生如泡面，加热三分钟，满足感持续三分钟。"',           pattern:'LLLLLMLLLLLLLMM', desc:'你不是不上进，你只是对"上进"的定义和大多数人不一样。你的快乐来自于非常具体的小事：一碗好吃的泡面、一个没人催你的周末、一部刚更新的剧集。你不需要很多，但你需要这些"很少"的东西不被打扰。你有时候会被别人的焦虑感染，但你有一种本能的自愈能力，睡一觉就好了。你的处世哲学是：够用就是最好。' },
+  { code:'VOLC',  name:'休眠火山',     tagline:'"我不发火，但如果发了，请提前撤离。"',                   pattern:'MLMMLMHLLMMHMLH', desc:'99%的时间里你是一个极其温和的人。好说话，有耐心，从不主动制造冲突。但你有一个开关，一旦被触碰，会触发你人生中最罕见也最震撼的情绪爆发。你不记仇，但你记"最后一根稻草"。你对人非常好，但你不是没有底线，只是底线在很深的地方。在你长期的平静之下，是一套清晰的价值观和不可撼动的原则。' },
+  { code:'SLYF',  name:'精神狐狸',     tagline:'"我不是城府深，我只是观察到了你们都没注意的细节。"',   pattern:'HMMMMHHMHHHMLMH', desc:'你是房间里最安静却把每个人都看穿了的那个人。你不急着表态，不急着展示，你在等一个合适的时机——不是算计，是审时度势。你的社交能力极强，但你通常把它藏起来，只在需要的时候拿出来用。你对人性有深刻的理解，但这种理解有时候让你觉得有点孤独，因为你能看穿太多，却无法对等地被人理解。' },
+  { code:'CLUD',  name:'云端漫游者',   tagline:'"我不是不接地气，我只是海拔不同。"',                     pattern:'HHLHHLHLLLMLLHH', desc:'你生活在一个比现实略高一点的平行世界里。你有宏大的想法，天马行空的创意，对未来有无限的憧憬，但明天的饭钱可能还没想好。你是那种十年后可能大红大紫、也可能还在说"我有个想法"的人。你最大的财富是想象力，最大的挑战是落地。你身边需要一个帮你管账、帮你设deadline的人，而你负责提供那些别人想不到的奇思妙想。' },
+  { code:'ROBT',  name:'精神机器人',   tagline:'"情绪是一种效率损耗，我已将其优化至最低。"',             pattern:'MHHHHHHHHHHHLLM', desc:'你高度自律，作息规律到令人发指，吃饭按营养配比，睡眠精确到分钟。你的朋友说你像个机器人，你表示这是夸奖。你不是没有情感，你只是已经把情感处理流程优化得非常高效。你的感情世界里你是一个极其可靠的伴侣，唯一的问题是：对方需要的那种"无意义的撒娇"，你的系统日志里查不到对应的处理程序。' },
+  { code:'GHST',  name:'存在感幽灵',   tagline:'"我来过，但没人注意到，这样挺好的。"',                   pattern:'LLLLLLLLLLLLLLL', desc:'你是最擅长隐身的那种人。不是因为内向，而是因为你发现"不存在"其实挺省事的。你可以在一个地方待很久，没人记得你的名字，但你把周围的一切都看得清清楚楚。你有一种独特的超能力：同时在场，又好像不在场。你对自由有极高的需求，对不被打扰的渴望胜过一切社交欲望。你最满足的时刻：一个人，安静，无需解释，无需表演。' },
+];
+
+// ===================================================
+// 状态
+// ===================================================
+let currentQ = 0;
+let answers  = new Array(25).fill(null);
+let autoTimer = null; // ✅ 用于清除自动跳题计时器
+
+// ===================================================
+// 页面控制
+// ===================================================
+function startQuiz() {
+  document.getElementById('cover').style.display = 'none';
+  const quiz = document.getElementById('quiz');
+  quiz.style.display = 'block';
+  currentQ = 0;
+  answers  = new Array(25).fill(null);
+  renderQuestion();
+}
+
+function restart() {
+  document.getElementById('result').style.display = 'none';
+  startQuiz();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const area = document.getElementById('question-area');
+  const letters = ['A','B','C','D'];
+
+  const specialHTML = q.special
+    ? `<div class="special-badge">✦ ${q.special_badge || '隐藏题'}</div>`
+    : '';
+
+  const optsHTML = q.opts.map((opt, i) => `
+    <button class="option-btn${answers[currentQ] === i ? ' selected' : ''}"
+            onclick="selectAnswer(${i})" id="opt-${i}">
+      <span class="opt-label">${letters[i]}</span>
+      <span>${opt}</span>
+    </button>
+  `).join('');
+
+  area.innerHTML = `
+    <div class="question-card${q.special ? ' special-q' : ''} fade-in">
+      ${specialHTML}
+      <div class="q-number">QUESTION ${String(currentQ+1).padStart(2,'0')} / 25</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${optsHTML}</div>
+    </div>
+  `;
+
+  // 进度
+  const pct = Math.round((currentQ / 25) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('q-count').textContent = `第 ${currentQ+1} 题`;
+  document.getElementById('q-pct').textContent   = pct + '%';
+
+  // 按钮
+  document.getElementById('prev-btn').disabled = currentQ === 0;
+  document.getElementById('next-btn').textContent = currentQ === 24 ? '查看结果 ✦' : '下一题 →';
+}
+
+// ✅ 核心修复：选中选项时【只更新样式】，不重新渲染整个题目，彻底消除闪烁
+function selectAnswer(idx) {
+  // 清除上一次的自动跳题计时器（防止连点导致跳题错误）
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+
+  answers[currentQ] = idx;
+
+  // 只更新按钮的 selected 状态，不碰 DOM 其他部分
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    if (i === idx) {
+      btn.classList.add('selected');
+    } else {
+      btn.classList.remove('selected');
+    }
+  });
+
+  // 400ms 后自动跳下一题
+  autoTimer = setTimeout(() => {
+    autoTimer = null;
+    if (currentQ < 24) nextQ();
+  }, 400);
+}
+
+function nextQ() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+
+  if (answers[currentQ] === null) {
+    // 轻微抖动提示
+    const card = document.querySelector('.question-card');
+    if (card) {
+      card.style.borderColor = 'rgba(255,80,80,0.5)';
+      setTimeout(() => { card.style.borderColor = ''; }, 700);
+    }
+    return;
+  }
+
+  if (currentQ < 24) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function prevQ() {
+  if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+  }
+}
+
+// ===================================================
+// 结果计算
+// ===================================================
+function showResult() {
+  const dimScores = new Array(15).fill(0);
+  for (let i = 0; i < 25; i++) {
+    const q      = QUESTIONS[i];
+    const ansIdx = answers[i] !== null ? answers[i] : 0;
+    dimScores[q.dim] += q.scores[ansIdx];
+  }
+
+  // 映射 L/M/H
+  let pattern = '';
+  for (let d = 0; d < 15; d++) {
+    const s = dimScores[d];
+    pattern += s <= 3 ? 'L' : s <= 4 ? 'M' : 'H';
+  }
+
+  // 最近人格匹配
+  const w = { L:1, M:2, H:3 };
+  let bestType = TYPES[0], bestDist = Infinity;
+  for (const t of TYPES) {
+    let dist = 0;
+    for (let i = 0; i < 15; i++) dist += Math.abs(w[pattern[i]] - w[t.pattern[i]]);
+    if (dist < bestDist) { bestDist = dist; bestType = t; }
+  }
+
+  // 渲染
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+
+  document.getElementById('r-code').textContent         = bestType.code;
+  document.getElementById('r-name').textContent         = bestType.name;
+  document.getElementById('r-tagline').textContent      = bestType.tagline;
+  document.getElementById('r-desc').textContent         = bestType.desc;
+  document.getElementById('share-code-display').textContent = bestType.code;
+  document.getElementById('share-name-display').textContent = bestType.name;
+
+  // 维度
+  const dimsDiv = document.getElementById('r-dims');
+  dimsDiv.innerHTML = '';
+  for (let i = 0; i < 15; i++) {
+    const level     = pattern[i];
+    const levelText = level === 'H' ? '高' : level === 'M' ? '中' : '低';
+    const pct       = level === 'H' ? (82 + Math.random()*12).toFixed(1)
+                    : level === 'M' ? (42 + Math.random()*18).toFixed(1)
+                    :                 (8  + Math.random()*22).toFixed(1);
+    dimsDiv.innerHTML += `
+      <div class="dim-item">
+        <div class="dim-row">
+          <span class="dim-name">${DIMS[i].name}</span>
+          <span class="dim-level level-${level}">${levelText} ${level}</span>
+        </div>
+        <div class="dim-bar-wrap">
+          <div class="dim-bar bar-${level}" style="width:0%" data-w="${pct}%"></div>
+        </div>
+        <div class="dim-desc">${DIMS[i].desc}</div>
+      </div>
+    `;
+  }
+
+  // 进度条动画
+  setTimeout(() => {
+    document.querySelectorAll('.dim-bar').forEach(b => { b.style.width = b.dataset.w; });
+  }, 120);
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function copyResult() {
+  const code = document.getElementById('r-code').textContent;
+  const name = document.getElementById('r-name').textContent;
+  const text = `我做了 NBTI 人格测试\n我的结果是 【${code}】${name}\n—— 你到底是哪种牛马？\n快来测测你是什么人格！`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => alert('✅ 复制成功！快去分享给朋友吧～'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('✅ 复制成功！快去分享给朋友吧～');
+  }
+}
+</script>
+
+</body>
+</html>
